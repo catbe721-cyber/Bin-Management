@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 訂單資料擷取器</title>
+    <!-- 載入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 使用 Inter 字體以獲得現代外觀 */
+        body { font-family: 'Inter', sans-serif; }
+        .loading-ring {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 md:p-10">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-800">AI 訂單資料擷取</h1>
+            <p class="text-gray-500 mt-2">上傳訂單或收據圖片，使用視覺模型自動提取關鍵資訊。</p>
+        </header>
+
+        <!-- 檔案上傳與操作區 -->
+        <div class="space-y-6">
+            <label class="block">
+                <span class="text-lg font-medium text-gray-700">選擇訂單圖片</span>
+                <input type="file" id="imageInput" accept="image/*" class="mt-2 block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100"
+                    onchange="handleImageUpload(event)">
+            </label>
+
+            <!-- 預覽圖與 API 鍵輸入 -->
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">圖片預覽</h2>
+                    <div id="imagePreviewContainer" class="min-h-40 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 p-4">
+                        <p class="text-gray-400" id="previewPlaceholder">在此顯示上傳的圖片</p>
+                        <img id="previewImage" class="max-w-full max-h-96 rounded-lg shadow-md hidden" alt="上傳的訂單圖片">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分析按鈕 -->
+            <button id="analyzeButton" onclick="analyzeOrder()"
+                class="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 transition duration-150 ease-in-out"
+                disabled>
+                <span id="buttonText">開始分析與擷取資料</span>
+                <div id="loadingIndicator" class="loading-ring ml-3 hidden"></div>
+            </button>
+        </div>
+
+        <!-- 結果顯示區 -->
+        <div class="mt-10 border-t pt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">擷取結果</h2>
+            <div id="resultsContainer">
+                <p id="resultPlaceholder" class="text-gray-500 bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                    請上傳圖片並點擊「開始分析」來查看結果。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 錯誤訊息模態框 -->
+    <div id="errorModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-3">錯誤</h3>
+            <p id="errorMessage" class="text-sm text-red-500">發生了一個未知錯誤。</p>
+            <div class="mt-4 text-right">
+                <button onclick="document.getElementById('errorModal').classList.add('hidden')"
+                    class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-full shadow-sm hover:bg-red-700">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase 相關全域變數，在此應用程式中未使用 Firestore，但仍需定義以符合環境要求
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+        
+        let base64Image = null;
+
+        // 顯示錯誤訊息並開啟模態框
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.remove('hidden');
+        }
+
+        // 處理圖片上傳和預覽
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            const previewImage = document.getElementById('previewImage');
+            const previewPlaceholder = document.getElementById('previewPlaceholder');
+            const analyzeButton = document.getElementById('analyzeButton');
+
+            if (file) {
+                // 檢查檔案大小（限制在 4MB 以內，API 限制）
+                if (file.size > 4 * 1024 * 1024) {
+                    showError('檔案太大。請選擇小於 4MB 的圖片。');
+                    event.target.value = ''; // 清除檔案選擇
+                    previewImage.classList.add('hidden');
+                    previewPlaceholder.classList.remove('hidden');
+                    analyzeButton.disabled = true;
+                    base64Image = null;
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.classList.remove('hidden');
+                    previewPlaceholder.classList.add('hidden');
+
+                    // 儲存 base64 數據，移除 mime type 前綴
+                    base64Image = e.target.result.split(',')[1];
+                    analyzeButton.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImage.classList.add('hidden');
+                previewPlaceholder.classList.remove('hidden');
+                analyzeButton.disabled = true;
+                base64Image = null;
+            }
+        };
+
+        // API 呼叫的指數退避重試機制
+        async function fetchWithRetry(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status !== 429 && response.ok) {
+                        return response;
+                    } else if (response.status === 429) {
+                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    } else {
+                        throw new Error(`API 請求失敗，狀態碼: ${response.status}`);
+                    }
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+
+        // 渲染結構化的擷取結果
+        function renderResults(data) {
+            const container = document.getElementById('resultsContainer');
+            if (!data || (data.items.length === 0 && !data.totalAmount)) {
+                container.innerHTML = `<p class="text-red-500 bg-red-50 p-4 rounded-xl border border-red-200">
+                    <span class="font-bold">無法擷取資料:</span> 模型未能從圖片中識別出有效的訂單資訊。請嘗試使用更清晰的圖片。
+                </p>`;
+                return;
+            }
+            
+            let itemsHtml = data.items.length > 0
+                ? data.items.map(item => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-6 py-3 font-medium text-gray-900">${item.itemName || '---'}</td>
+                        <td class="px-6 py-3 text-center">${item.quantity !== null ? item.quantity : '---'}</td>
+                        <td class="px-6 py-3 text-right">${item.unitPrice !== null ? `${data.currency || ''} ${item.unitPrice.toFixed(2)}` : '---'}</td>
+                    </tr>
+                `).join('')
+                : `<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">未偵測到詳細商品項目。</td></tr>`;
+
+            const totalAmount = data.totalAmount !== null ? data.totalAmount.toFixed(2) : '---';
+            const currency = data.currency || '---';
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        商品名稱
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        數量
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        單價
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <div class="w-full md:w-96 p-4 bg-blue-50 border-t-4 border-blue-600 rounded-lg shadow-inner">
+                            <div class="flex justify-between items-center text-xl font-bold text-gray-800">
+                                <span>總金額 (Total):</span>
+                                <span class="text-blue-700">${currency} ${totalAmount}</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2 text-right">（此為模型從圖片中識別出的最終總額）</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // 呼叫 Gemini API 進行 OCR 和結構化資料擷取
+        window.analyzeOrder = async function() {
+            if (!base64Image) {
+                showError('請先上傳一個圖片檔案。');
+                return;
+            }
+
+            const analyzeButton = document.getElementById('analyzeButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const buttonText = document.getElementById('buttonText');
+            const resultPlaceholder = document.getElementById('resultPlaceholder');
+
+            // 設置載入狀態
+            analyzeButton.disabled = true;
+            buttonText.textContent = '分析中...';
+            loadingIndicator.classList.remove('hidden');
+            resultPlaceholder.textContent = '正在呼叫 AI 模型分析圖片，請稍候...';
+            resultPlaceholder.classList.remove('bg-yellow-50', 'border-yellow-200');
+            resultPlaceholder.classList.add('bg-gray-100', 'border-gray-300');
+
+
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            // 定義模型應輸出的 JSON 結構
+            const responseSchema = {
+                type: "OBJECT",
+                properties: {
+                    items: {
+                        type: "ARRAY",
+                        description: "List of items extracted from the order.",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                itemName: { "type": "STRING", "description": "The name or description of the item." },
+                                quantity: { "type": "NUMBER", "description": "The count of the item, if found. Use 1 if not explicitly stated." },
+                                unitPrice: { "type": "NUMBER", "description": "The price of one unit of the item, if found. Use the subtotal for this item if unit price is not clear." }
+                            },
+                            propertyOrdering: ["itemName", "quantity", "unitPrice"]
+                        }
+                    },
+                    totalAmount: { "type": "NUMBER", "description": "The final grand total amount of the order, excluding tax or shipping if possible." },
+                    currency: { "type": "STRING", "description": "The currency symbol or code (e.g., HKD, TWD, $)." }
+                },
+                propertyOrdering: ["items", "totalAmount", "currency"]
+            };
+
+            // 系統指令：指導模型以專家身份執行任務
+            const systemPrompt = "您是一個專業的 OCR 和商業文件數據提取系統。您的任務是從提供的訂單、收據或發票圖像中準確提取所有結構化數據。您必須嚴格按照提供的 JSON 格式進行輸出。對於提取到的數值，請確保它們是純數字類型（NUMBER）。";
+
+            // 使用者查詢：具體任務要求
+            const userQuery = "請分析這張訂單或收據圖片。從文件中提取詳細的商品列表（商品名稱、數量和單價），以及訂單的總金額和貨幣。所有結果必須以單一 JSON 物件形式嚴格按照結構定義輸出。如果數據缺失或不清晰，請使用 null。";
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: userQuery },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg", // 假設為 JPEG，更精確應從檔案類型讀取，但這裡使用通用類型
+                                    data: base64Image
+                                }
+                            }
+                        ]
+                    }
+                ],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                },
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, options);
+                const result = await response.json();
+
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const jsonText = candidate.content.parts[0].text;
+                    const parsedData = JSON.parse(jsonText);
+                    renderResults(parsedData);
+                } else {
+                    throw new Error('API 回應中沒有有效的內容。');
+                }
+
+            } catch (error) {
+                console.error("API Error:", error);
+                showError(`處理圖片時發生錯誤: ${error.message}`);
+                document.getElementById('resultsContainer').innerHTML = `<p class="text-red-500 bg-red-50 p-4 rounded-xl border border-red-200">
+                    <span class="font-bold">分析失敗:</span> ${error.message}。請檢查網路連線或圖片內容是否清晰。
+                </p>`;
+            } finally {
+                // 恢復按鈕狀態
+                analyzeButton.disabled = base64Image === null;
+                buttonText.textContent = '開始分析與擷取資料';
+                loadingIndicator.classList.add('hidden');
+                document.getElementById('resultPlaceholder').classList.remove('bg-gray-100', 'border-gray-300');
+            }
+        };
+
+        // 頁面載入時確保按鈕狀態正確
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('analyzeButton').disabled = true;
+        });
+
+    </script>
+</body>
+</html>
