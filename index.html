@@ -3,220 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>專業庫存管理系統</title>
+    <title>專業庫存管理系統 Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            background: var(--bg-gradient);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            color: #1e293b;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .app-container {
+            max-width: 440px;
+            margin: 0 auto;
+            min-height: 100vh;
         }
-        .input-focus-effect:focus {
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
         }
-        .btn-gradient {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .btn-gradient:active {
-            transform: scale(0.98);
-            filter: brightness(0.9);
-        }
-        /* 自定義下拉箭頭 */
         select {
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 0.5rem center;
-            background-size: 1.2em;
+            background-position: right 0.7rem center;
+            background-size: 1.1em;
         }
-        .section-divider {
-            position: relative;
-            text-align: center;
-            margin: 1.5rem 0;
+        .switch-input:checked ~ .switch-dot {
+            transform: translateX(100%);
+            background-color: white;
         }
-        .section-divider::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: #e2e8f0;
-            z-index: 1;
+        .switch-input:checked ~ .switch-bg {
+            background-color: var(--primary);
         }
-        .section-divider span {
-            position: relative;
-            background: #ffffff;
-            padding: 0 0.75rem;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            z-index: 2;
+        .input-field {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1.5px solid #e2e8f0;
+        }
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+            background-color: white;
+        }
+        .btn-active:active {
+            transform: scale(0.97);
+        }
+        .history-item {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="min-h-screen pb-12">
-    <div class="max-w-md mx-auto px-4 pt-8">
-        <!-- 頂部標題 -->
-        <header class="mb-8 flex items-center justify-between">
+<body class="p-4 md:p-8">
+    <div class="app-container">
+        <!-- 頂部標誌 -->
+        <div class="flex items-center justify-between mb-8 px-2">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">庫存錄入</h1>
-                <p class="text-slate-500 text-sm font-medium">智能雲端同步系統</p>
+                <span class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-1 rounded-md mb-2 inline-block">Enterprise Edition</span>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">庫存錄入 <span class="text-indigo-600">Pro</span></h1>
             </div>
-            <div class="bg-indigo-50 p-2 rounded-xl">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            <div class="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             </div>
-        </header>
-
-        <!-- API 設定 (摺疊) -->
-        <div class="mb-6">
-            <details class="group">
-                <summary class="flex items-center justify-between cursor-pointer list-none p-3 bg-slate-200/50 rounded-xl text-slate-600 hover:bg-slate-200 transition-colors">
-                    <span class="text-xs font-semibold flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0" />
-                        </svg>
-                        API 配置狀態
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </summary>
-                <div class="p-4 mt-2 bg-white rounded-xl shadow-inner border border-slate-100">
-                    <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">GAS Web App URL</label>
-                    <input type="text" id="gasUrl" 
-                           value="https://script.google.com/macros/s/AKfycbzIOnO9GKTS8MF7fB1ts4Pr1_8Ymw_Ns_lqMSXEksnXQ8swKQUNB_hgCxdpx8PpC4GOCQ/exec"
-                           class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-500 focus:outline-none focus:border-indigo-300">
-                </div>
-            </details>
         </div>
 
-        <!-- 主卡片區域 -->
-        <main class="glass-card rounded-3xl p-6 shadow-xl shadow-slate-200/60">
+        <!-- API 配置 -->
+        <details class="group mb-6 bg-white rounded-2xl border border-slate-100 card-shadow">
+            <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                <span class="text-xs font-bold text-slate-500 uppercase flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                    API 端點配置
+                </span>
+                <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </summary>
+            <div class="px-4 pb-4">
+                <input type="text" id="gasUrl" 
+                       value="https://script.google.com/macros/s/AKfycbz0o_2H1FT1Kc-2N5agOSigOmkwNKUF85wqBiLTI0i8fGqsZYZlccnPk-AX8sdIixb8/exec"
+                       class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500 font-mono outline-none">
+            </div>
+        </details>
+
+        <!-- 主要輸入區域 -->
+        <main class="space-y-6">
             <form id="inventoryForm" class="space-y-5">
-                
-                <!-- 位置資訊分組 -->
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-sm font-bold text-slate-700 flex items-center">
-                            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span>
-                            儲位資訊 (Bin Code)
-                        </label>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="keep_binCode" class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500 relative"></div>
-                            <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">保留</span>
+                <!-- 位置資訊 -->
+                <div class="bg-white p-5 rounded-[2rem] card-shadow border border-slate-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">儲位資訊 (Bin Code)</h2>
+                        <label class="flex items-center cursor-pointer">
+                            <span class="mr-2 text-[10px] font-bold text-slate-400">保留</span>
+                            <div class="relative">
+                                <input type="checkbox" id="keep_binCode" class="sr-only switch-input">
+                                <div class="w-8 h-4 bg-slate-200 rounded-full switch-bg transition-colors duration-200"></div>
+                                <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full switch-dot shadow-sm transition-transform duration-200"></div>
+                            </div>
                         </label>
                     </div>
-                    <div class="grid grid-cols-4 gap-2">
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-center text-slate-400 font-bold mb-1">貨架</span>
-                            <select id="bin_rack" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all">
-                                <option value="R">R</option><option value="F">F</option>
+                    <div class="grid grid-cols-4 gap-3">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-bold text-slate-400 pl-1">貨架</p>
+                            <select id="bin_rack" class="w-full p-3 bg-slate-50 rounded-xl text-slate-800 font-bold text-sm input-field outline-none">
+                                <option value="R">R</option><option value="F">F</option><option value="OTH">OTH</option>
                             </select>
                         </div>
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-center text-slate-400 font-bold mb-1">行數</span>
-                            <select id="bin_row" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-bold text-slate-400 pl-1">行數</p>
+                            <select id="bin_row" class="w-full p-3 bg-slate-50 rounded-xl text-slate-800 font-bold text-sm input-field outline-none">
                                 <option value="A">A</option><option value="B">B</option><option value="C">C</option>
                                 <option value="D">D</option><option value="E">E</option><option value="F">F</option>
                                 <option value="G">G</option><option value="H">H</option><option value="J">J</option>
                             </select>
                         </div>
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-center text-slate-400 font-bold mb-1">板位</span>
-                            <select id="bin_pos" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-bold text-slate-400 pl-1">板位</p>
+                            <select id="bin_pos" class="w-full p-3 bg-slate-50 rounded-xl text-slate-800 font-bold text-sm input-field outline-none">
                                 <option value="01">01</option><option value="02">02</option><option value="03">03</option>
                                 <option value="04">04</option><option value="05">05</option><option value="06">06</option>
                                 <option value="07">07</option><option value="08">08</option><option value="09">09</option>
                                 <option value="10">10</option><option value="11">11</option><option value="12">12</option>
                             </select>
                         </div>
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-center text-slate-400 font-bold mb-1">層數</span>
-                            <select id="bin_level" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all">
+                        <div class="space-y-1">
+                            <p class="text-[9px] font-bold text-slate-400 pl-1">層數</p>
+                            <select id="bin_level" class="w-full p-3 bg-slate-50 rounded-xl text-slate-800 font-bold text-sm input-field outline-none">
                                 <option value="1">1</option><option value="2">2</option><option value="3">3</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="section-divider"><span>產品數據</span></div>
-
                 <!-- 產品資訊 -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-sm font-bold text-slate-700">產品名稱 (Item)</label>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="keep_item" class="sr-only peer">
-                            <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500 relative"></div>
-                            <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">保留</span>
-                        </label>
-                    </div>
-                    <input type="text" id="item" placeholder="輸入產品代碼或名稱" required
-                           class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-medium input-focus-effect focus:border-indigo-400 outline-none transition-all">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-sm font-bold text-slate-700">數量 (Qty)</label>
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="keep_qty" class="sr-only peer">
-                                <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500 relative"></div>
-                                <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">保留</span>
+                <div class="bg-white p-5 rounded-[2rem] card-shadow border border-slate-100 space-y-5">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">產品名稱 (Item)</label>
+                            <label class="flex items-center cursor-pointer">
+                                <span class="mr-2 text-[10px] font-bold text-slate-400">保留</span>
+                                <div class="relative">
+                                    <input type="checkbox" id="keep_item" class="sr-only switch-input">
+                                    <div class="w-8 h-4 bg-slate-200 rounded-full switch-bg transition-colors duration-200"></div>
+                                    <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full switch-dot shadow-sm transition-transform duration-200"></div>
+                                </div>
                             </label>
                         </div>
-                        <input type="number" id="qty" placeholder="0" required
-                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-bold text-xl input-focus-effect focus:border-indigo-400 outline-none transition-all">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-sm font-bold text-slate-700">單位 (UoM)</label>
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="keep_uom" class="sr-only peer" checked>
-                                <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500 relative"></div>
-                                <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">保留</span>
-                            </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                            </span>
+                            <input type="text" id="item" placeholder="請輸入產品代碼..." required
+                                   class="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-semibold input-field outline-none">
                         </div>
-                        <select id="uom" required
-                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 font-semibold input-focus-effect focus:border-indigo-400 outline-none transition-all">
-                            <option value="件">件</option>
-                            <option value="箱">箱</option>
-                            <option value="卷">卷</option>
-                            <option value="板">板</option>
-                            <option value="其他">其他</option>
-                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">數量 (Qty)</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="keep_qty" class="sr-only switch-input">
+                                    <div class="relative">
+                                        <div class="w-8 h-4 bg-slate-200 rounded-full switch-bg transition-colors duration-200"></div>
+                                        <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full switch-dot shadow-sm transition-transform duration-200"></div>
+                                    </div>
+                                </label>
+                            </div>
+                            <input type="number" id="qty" placeholder="0" required
+                                   class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-extrabold text-2xl input-field outline-none text-center">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">單位 (UoM)</label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="keep_uom" class="sr-only switch-input" checked>
+                                    <div class="relative">
+                                        <div class="w-8 h-4 bg-slate-200 rounded-full switch-bg transition-colors duration-200"></div>
+                                        <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full switch-dot shadow-sm transition-transform duration-200"></div>
+                                    </div>
+                                </label>
+                            </div>
+                            <select id="uom" required
+                                   class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 font-bold input-field outline-none">
+                                <option value="件">件</option><option value="箱">箱</option><option value="卷">卷</option><option value="板">板</option><option value="其他">其他</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 提交按鈕 -->
                 <button type="submit" id="submitBtn"
-                        class="w-full btn-gradient text-white font-bold py-5 rounded-2xl shadow-lg shadow-indigo-200 mt-4 flex items-center justify-center space-x-2 text-lg">
-                    <span>傳送資料</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
+                        class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-5 rounded-[1.5rem] shadow-xl shadow-slate-200 mt-2 flex items-center justify-center space-x-3 text-lg btn-active transition-all duration-300">
+                    <span>同步雲端</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </button>
             </form>
 
-            <div id="status" class="status-msg font-semibold text-sm"></div>
+            <div id="status" class="status-msg hidden"></div>
+
+            <!-- 最近紀錄區塊 -->
+            <section class="mt-8">
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <h2 class="text-xs font-extrabold text-slate-400 uppercase tracking-[0.2em]">最近紀錄 (Recent)</h2>
+                    <button onclick="clearHistoryUI()" class="text-[10px] font-bold text-indigo-500 uppercase hover:text-indigo-700 transition-colors">清除清單</button>
+                </div>
+                <div id="historyList" class="space-y-3">
+                    <div id="noHistory" class="bg-slate-100/50 border border-dashed border-slate-200 rounded-3xl py-8 text-center">
+                        <p class="text-xs font-bold text-slate-400">目前尚無錄入紀錄</p>
+                    </div>
+                </div>
+            </section>
         </main>
 
-        <p class="text-center text-slate-400 text-[10px] mt-8 font-medium uppercase tracking-[0.2em]">
-            Professional Inventory System v2.0
-        </p>
+        <footer class="mt-12 text-center pb-8">
+            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">Precision Inventory v2.6</p>
+        </footer>
     </div>
 
     <script>
@@ -224,8 +231,10 @@
         const statusDiv = document.getElementById('status');
         const gasUrlInput = document.getElementById('gasUrl');
         const submitBtn = document.getElementById('submitBtn');
+        const historyList = document.getElementById('historyList');
+        const noHistory = document.getElementById('noHistory');
 
-        const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzIOnO9GKTS8MF7fB1ts4Pr1_8Ymw_Ns_lqMSXEksnXQ8swKQUNB_hgCxdpx8PpC4GOCQ/exec";
+        const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbz0o_2H1FT1Kc-2N5agOSigOmkwNKUF85wqBiLTI0i8fGqsZYZlccnPk-AX8sdIixb8/exec";
 
         window.onload = () => {
             const savedUrl = localStorage.getItem('gas_web_app_url');
@@ -261,7 +270,7 @@
             
             const url = gasUrlInput.value.trim();
             if (!url) {
-                showStatus('⚠️ 未設定 API 網址', 'error');
+                showStatus('⚠️ 未配置 API 網址', 'error');
                 return;
             }
 
@@ -301,14 +310,42 @@
                     body: JSON.stringify(payload)
                 });
 
-                showStatus('✅ 提交成功！試算表已更新', 'success');
+                showStatus('✅ 資料已成功同步至雲端', 'success');
+                addToHistory(payload); // 新增到最近紀錄
                 handlePostSubmitClearing();
             } catch (error) {
-                showStatus('❌ 出錯: ' + error.message, 'error');
+                showStatus('❌ 同步失敗: ' + error.message, 'error');
             } finally {
                 setLoading(false);
             }
         });
+
+        function addToHistory(data) {
+            if (noHistory) noHistory.style.display = 'none';
+            
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'history-item bg-white p-4 rounded-3xl border border-slate-100 card-shadow flex flex-col space-y-2';
+            
+            itemDiv.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <span class="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">${data.binCode}</span>
+                    <span class="text-[9px] font-bold text-slate-400 tracking-tighter uppercase">${timeStr}</span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <p class="text-sm font-bold text-slate-800 truncate pr-4">${data.item}</p>
+                    <p class="text-xs font-black text-slate-900 flex-shrink-0">${data.qty} <span class="text-[10px] font-bold text-slate-400 ml-0.5">${data.uom}</span></p>
+                </div>
+            `;
+            
+            historyList.insertBefore(itemDiv, historyList.firstChild);
+        }
+
+        function clearHistoryUI() {
+            historyList.innerHTML = `<div id="noHistory" class="bg-slate-100/50 border border-dashed border-slate-200 rounded-3xl py-8 text-center"><p class="text-xs font-bold text-slate-400">目前尚無錄入紀錄</p></div>`;
+        }
 
         function handlePostSubmitClearing() {
             if (!document.getElementById('keep_binCode').checked) {
@@ -324,22 +361,16 @@
 
         function showStatus(msg, type) {
             statusDiv.textContent = msg;
-            statusDiv.style.display = 'block';
-            statusDiv.className = type === 'success' 
-                ? 'status-msg mt-4 p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 text-center' 
-                : 'status-msg mt-4 p-4 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 text-center';
-            if (type === 'success') setTimeout(() => { 
-                statusDiv.style.opacity = '0';
-                setTimeout(() => { statusDiv.style.display = 'none'; statusDiv.style.opacity = '1'; }, 500);
-            }, 3000);
+            statusDiv.className = `status-msg block p-4 mt-4 rounded-2xl text-center font-bold text-sm shadow-lg ${type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`;
+            if (type === 'success') setTimeout(() => { statusDiv.className = 'hidden'; }, 3000);
         }
 
         function setLoading(loading) {
             submitBtn.disabled = loading;
             submitBtn.innerHTML = loading 
-                ? `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 處理中...` 
-                : `<span>傳送資料</span><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>`;
-            submitBtn.style.opacity = loading ? '0.8' : '1';
+                ? `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>同步中...</span>` 
+                : `<span>同步雲端</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>`;
+            submitBtn.classList.toggle('opacity-70', loading);
         }
     </script>
 </body>
